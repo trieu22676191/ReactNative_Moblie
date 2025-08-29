@@ -19,8 +19,8 @@ class Circle extends shape {
     }
 }
 const shapes = [
-    new Square(5),
-    new Circle(3),
+    new Square(4),
+    new Circle(2),
 ];
 shapes.forEach(s => {
     console.log(`Diện tích: ${s.area().toFixed(2)}`);
