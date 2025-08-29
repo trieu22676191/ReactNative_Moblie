@@ -1,5 +1,5 @@
 //Tạo lớp Book với các thuộc tính title, author, year.
-class Book{
+export class Book{
     title: string;
     author: string;
     year: number;
