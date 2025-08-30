@@ -1,25 +1,25 @@
 "use strict";
 class Animal {
-    speak() {
-        console.log("The animal makes a sound");
+    sound() {
+        console.log("The animal make a sound");
     }
 }
 class Dogo extends Animal {
-    speak() {
+    sound() {
         console.log("Woof");
     }
 }
 class Cata extends Animal {
-    speak() {
+    sound() {
         console.log("Meow");
     }
 }
-function makeAnimalSpeak(animal) {
-    animal.speak();
+function makeAnimalSound(animal) {
+    animal.sound();
 }
 const a1 = new Animal();
 const a2 = new Dogo();
 const a3 = new Cata();
-makeAnimalSpeak(a1);
-makeAnimalSpeak(a2);
-makeAnimalSpeak(a3);
+makeAnimalSound(a1);
+makeAnimalSound(a2);
+makeAnimalSound(a3);
