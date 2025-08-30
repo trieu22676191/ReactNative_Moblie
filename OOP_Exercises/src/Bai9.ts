@@ -3,7 +3,7 @@ interface Animal {
   sound(): void;
 }
 
-class Dog implements Animal {
+export class Dog implements Animal {
   name: string;
   constructor(name: string) {
     this.name = name;
@@ -13,7 +13,7 @@ class Dog implements Animal {
   }
 }
 
-class Cat implements Animal {
+export class Cat implements Animal {
   name: string;
   constructor(name: string) {
     this.name = name;
