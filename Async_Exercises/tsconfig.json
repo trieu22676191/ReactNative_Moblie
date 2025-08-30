@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es6", /* Chỉ định phiên bản JavaScript mà TypeScript sẽ biên dịch ra */
+    "target": "es2018", /* Chỉ định phiên bản JavaScript mà TypeScript sẽ biên dịch ra */
+    "lib": ["es2018", "dom"], /* Thêm thư viện ES2018 và DOM */
     "module": "commonjs", /* Sử dụng module CommonJS */
     "strict": true, /* Bật kiểm tra strict */
     "esModuleInterop": true, /* Hỗ trợ import/export ES Modules */
