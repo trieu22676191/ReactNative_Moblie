@@ -1,15 +1,15 @@
 "use strict";
 class CashPayment {
     pay(amount) {
-        console.log(`Paid $${amount} in cash.`);
+        console.log(`Paid ${amount} in cash.`);
     }
 }
 class CardPayment {
     pay(amount) {
-        console.log(`Paid $${amount} in card.`);
+        console.log(`Paid ${amount} using card.`);
     }
 }
-const cash = new CashPayment();
-cash.pay(100);
-const card = new CardPayment();
-card.pay(250);
+const cashPayment = new CashPayment();
+cashPayment.pay(100);
+const cardPayment = new CardPayment();
+cardPayment.pay(200);
