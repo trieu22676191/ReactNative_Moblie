@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { deleteExpense } from "../database/db";
 
 export type Expense = {
   id: number;
@@ -10,13 +11,40 @@ export type Expense = {
   type: string;
 };
 
-export default function ExpenseItem({ item }: { item: Expense }) {
+type ExpenseItemProps = {
+  item: Expense;
+  onDelete?: () => void;
+};
+
+export default function ExpenseItem({ item, onDelete }: ExpenseItemProps) {
   const navigation = useNavigation<any>();
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Xác nhận xóa",
+      `Bạn có chắc chắn muốn xóa "${item.title}"?`,
+      [
+        {
+          text: "Hủy",
+          style: "cancel",
+        },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            await deleteExpense(item.id);
+            if (onDelete) onDelete();
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <TouchableOpacity
       style={styles.item}
       onPress={() => navigation.navigate("EditExpense", { item })}
+      onLongPress={handleDelete}
     >
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Text style={styles.title}>{item.title}</Text>

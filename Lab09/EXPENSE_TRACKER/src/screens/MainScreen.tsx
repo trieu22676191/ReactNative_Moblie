@@ -26,13 +26,20 @@ export default function MainScreen({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>EXPENSE TRACKER</Text>
+        <TouchableOpacity
+          style={styles.trashButton}
+          onPress={() => navigation.navigate("TrashScreen")}
+        >
+          <Text style={styles.trashText}>🗑️ Thùng rác</Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
         data={expenses}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <ExpenseItem item={item} />}
+        renderItem={({ item }) => (
+          <ExpenseItem item={item} onDelete={loadExpenses} />
+        )}
         contentContainerStyle={{ padding: 16 }}
       />
 
@@ -50,6 +57,18 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f5f5" },
   header: { backgroundColor: "#4a90e2", padding: 20, alignItems: "center" },
   title: { fontSize: 22, fontWeight: "bold", color: "white" },
+  trashButton: {
+    marginTop: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  trashText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
+  },
   addButton: {
     position: "absolute",
     bottom: 30,

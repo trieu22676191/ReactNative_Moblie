@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import MainScreen from "./src/screens/MainScreen";
 import AddExpenseScreen from "./src/screens/AddExpenseScreen";
 import EditScreen from "./src/screens/EditScreen";
+import TrashScreen from "./src/screens/TrashScreen";
 import { createTable } from "./src/database/db";
 
 const Stack = createNativeStackNavigator();
@@ -33,6 +34,12 @@ export default function App() {
             name="EditExpense"
             component={EditScreen}
             options={{ title: "Cập nhật khoản chi" }}
+          />
+
+          <Stack.Screen
+            name="TrashScreen"
+            component={TrashScreen}
+            options={{ title: "Thùng rác" }}
           />
         </Stack.Navigator>
       </NavigationContainer>
