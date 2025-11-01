@@ -42,12 +42,21 @@ export default function MainScreen({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.trashButton}
-          onPress={() => navigation.navigate("TrashScreen")}
-        >
-          <Text style={styles.trashText}>🗑️ Thùng rác</Text>
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={() => navigation.navigate("TrashScreen")}
+          >
+            <Text style={styles.headerButtonText}>🗑️ Thùng rác</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={() => navigation.navigate("SettingsScreen")}
+          >
+            <Text style={styles.headerButtonText}>⚙️ Đồng bộ</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Search Bar */}
@@ -107,14 +116,18 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f5f5" },
   header: { backgroundColor: "#4a90e2", padding: 20, alignItems: "center" },
   title: { fontSize: 22, fontWeight: "bold", color: "white" },
-  trashButton: {
+  headerButtons: {
+    flexDirection: "row",
+    gap: 10,
     marginTop: 10,
+  },
+  headerButton: {
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 8,
   },
-  trashText: {
+  headerButtonText: {
     color: "white",
     fontSize: 14,
     fontWeight: "600",
