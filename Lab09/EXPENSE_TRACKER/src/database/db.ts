@@ -29,3 +29,15 @@ export const getAllExpenses = async () => {
   const result = await db.getAllAsync("SELECT * FROM expenses ORDER BY id DESC");
   return result;
 };
+
+export const updateExpense = async (
+  id: number,
+  title: string,
+  amount: number,
+  type: string
+) => {
+  await db.runAsync(
+    `UPDATE expenses SET title = ?, amount = ?, type = ? WHERE id = ?`,
+    [title, amount, type, id]
+  );
+};
