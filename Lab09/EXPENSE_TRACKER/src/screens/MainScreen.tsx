@@ -52,6 +52,13 @@ export default function MainScreen({ navigation }: any) {
         <View style={styles.headerButtons}>
           <TouchableOpacity
             style={styles.headerButton}
+            onPress={() => navigation.navigate("StatisticsScreen")}
+          >
+            <Text style={styles.headerButtonText}>📊 Thống kê</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.headerButton}
             onPress={() => navigation.navigate("TrashScreen")}
           >
             <Text style={styles.headerButtonText}>🗑️ Thùng rác</Text>

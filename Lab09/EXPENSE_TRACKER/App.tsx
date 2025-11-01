@@ -7,6 +7,7 @@ import AddExpenseScreen from "./src/screens/AddExpenseScreen";
 import EditScreen from "./src/screens/EditScreen";
 import TrashScreen from "./src/screens/TrashScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
+import StatisticsScreen from "./src/screens/StatisticsScreen";
 import { createTable } from "./src/database/db";
 
 const Stack = createNativeStackNavigator();
@@ -47,6 +48,12 @@ export default function App() {
             name="SettingsScreen"
             component={SettingsScreen}
             options={{ title: "Cài đặt & Đồng bộ" }}
+          />
+
+          <Stack.Screen
+            name="StatisticsScreen"
+            component={StatisticsScreen}
+            options={{ title: "Thống kê" }}
           />
         </Stack.Navigator>
       </NavigationContainer>
