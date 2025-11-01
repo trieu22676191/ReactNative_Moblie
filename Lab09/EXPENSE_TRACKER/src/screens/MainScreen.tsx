@@ -5,6 +5,7 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ExpenseItem, { Expense } from "../components/ExpenseItem";
@@ -12,6 +13,7 @@ import { getAllExpenses } from "../database/db";
 
 export default function MainScreen({ navigation }: any) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const loadExpenses = async () => {
     const data = await getAllExpenses();
@@ -22,6 +24,11 @@ export default function MainScreen({ navigation }: any) {
     const unsubscribe = navigation.addListener("focus", loadExpenses);
     return unsubscribe;
   }, [navigation]);
+
+  // Lọc danh sách theo từ khóa tìm kiếm
+  const filteredExpenses = expenses.filter((expense) =>
+    expense.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -34,13 +41,39 @@ export default function MainScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <Text style={styles.searchIcon}>🔍</Text>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Tìm kiếm theo tên khoản..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholderTextColor="#999"
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery("")}>
+            <Text style={styles.clearButton}>✕</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
       <FlatList
-        data={expenses}
+        data={filteredExpenses}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <ExpenseItem item={item} onDelete={loadExpenses} />
         )}
         contentContainerStyle={{ padding: 16 }}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              {searchQuery
+                ? "Không tìm thấy kết quả nào"
+                : "Chưa có khoản thu chi nào"}
+            </Text>
+          </View>
+        }
       />
 
       <TouchableOpacity
@@ -68,6 +101,43 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 14,
     fontWeight: "600",
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    margin: 16,
+    marginBottom: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  searchIcon: {
+    fontSize: 18,
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    padding: 4,
+  },
+  clearButton: {
+    fontSize: 20,
+    color: "#999",
+    paddingHorizontal: 8,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#999",
   },
   addButton: {
     position: "absolute",
