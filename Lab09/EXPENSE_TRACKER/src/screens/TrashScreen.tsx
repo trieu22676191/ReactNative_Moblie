@@ -24,6 +24,9 @@ export default function TrashScreen({ navigation }: any) {
   const [deletedExpenses, setDeletedExpenses] = useState<Expense[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [filterType, setFilterType] = useState<"Tất cả" | "Thu" | "Chi">(
+    "Tất cả"
+  );
 
   const loadDeletedExpenses = async () => {
     const data = await getDeletedExpenses();
@@ -90,10 +93,14 @@ export default function TrashScreen({ navigation }: any) {
     </TouchableOpacity>
   );
 
-  // Lọc danh sách theo từ khóa tìm kiếm
-  const filteredExpenses = deletedExpenses.filter((expense) =>
-    expense.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Lọc danh sách theo từ khóa tìm kiếm và loại thu/chi
+  const filteredExpenses = deletedExpenses.filter((expense) => {
+    const matchSearch = expense.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchType = filterType === "Tất cả" || expense.type === filterType;
+    return matchSearch && matchType;
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -119,6 +126,62 @@ export default function TrashScreen({ navigation }: any) {
             <Text style={styles.clearButton}>✕</Text>
           </TouchableOpacity>
         )}
+      </View>
+
+      {/* Filter Bar */}
+      <View style={styles.filterContainer}>
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            filterType === "Tất cả" && styles.filterButtonActive,
+          ]}
+          onPress={() => setFilterType("Tất cả")}
+        >
+          <Text
+            style={[
+              styles.filterButtonText,
+              filterType === "Tất cả" && styles.filterButtonTextActive,
+            ]}
+          >
+            📊 Tất cả
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            filterType === "Thu" && styles.filterButtonActive,
+            filterType === "Thu" && styles.filterButtonIncome,
+          ]}
+          onPress={() => setFilterType("Thu")}
+        >
+          <Text
+            style={[
+              styles.filterButtonText,
+              filterType === "Thu" && styles.filterButtonTextActive,
+            ]}
+          >
+            💰 Thu
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            filterType === "Chi" && styles.filterButtonActive,
+            filterType === "Chi" && styles.filterButtonExpense,
+          ]}
+          onPress={() => setFilterType("Chi")}
+        >
+          <Text
+            style={[
+              styles.filterButtonText,
+              filterType === "Chi" && styles.filterButtonTextActive,
+            ]}
+          >
+            💸 Chi
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {filteredExpenses.length === 0 ? (
@@ -193,6 +256,46 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#999",
     paddingHorizontal: 8,
+  },
+  filterContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    gap: 10,
+  },
+  filterButton: {
+    flex: 1,
+    backgroundColor: "white",
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#ddd",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  filterButtonActive: {
+    backgroundColor: "#e74c3c",
+    borderColor: "#e74c3c",
+  },
+  filterButtonIncome: {
+    backgroundColor: "#27ae60",
+    borderColor: "#27ae60",
+  },
+  filterButtonExpense: {
+    backgroundColor: "#e74c3c",
+    borderColor: "#e74c3c",
+  },
+  filterButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#666",
+  },
+  filterButtonTextActive: {
+    color: "white",
   },
   item: {
     backgroundColor: "#fff3cd",
