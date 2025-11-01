@@ -43,20 +43,28 @@ export default function TrashScreen({ navigation }: any) {
   }, [navigation]);
 
   const handleRestore = (item: Expense) => {
-    Alert.alert("Khôi phục khoản chi", `Bạn muốn khôi phục "${item.title}"?`, [
-      {
-        text: "Hủy",
-        style: "cancel",
-      },
-      {
-        text: "Khôi phục",
-        onPress: async () => {
-          await restoreExpense(item.id);
-          loadDeletedExpenses();
-          Alert.alert("Thành công", "Đã khôi phục khoản chi!");
+    Alert.alert(
+      "Khôi phục khoản chi",
+      `Bạn muốn khôi phục "${item.title}" (${item.amount}đ)?`,
+      [
+        {
+          text: "Hủy",
+          style: "cancel",
         },
-      },
-    ]);
+        {
+          text: "Khôi phục",
+          style: "default",
+          onPress: async () => {
+            await restoreExpense(item.id);
+            await loadDeletedExpenses(); // Reload danh sách thùng rác
+            Alert.alert(
+              "Thành công",
+              "Đã khôi phục khoản chi về danh sách chính!"
+            );
+          },
+        },
+      ]
+    );
   };
 
   const renderItem = ({ item }: { item: Expense }) => (
@@ -78,7 +86,7 @@ export default function TrashScreen({ navigation }: any) {
       </View>
       <Text style={styles.type}>{item.type}</Text>
       <Text style={styles.date}>{item.createdAt}</Text>
-      <Text style={styles.hint}>Nhấn để khôi phục</Text>
+      <Text style={styles.hint}>💡 Nhấn hoặc giữ lâu để khôi phục</Text>
     </TouchableOpacity>
   );
 
