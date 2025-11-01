@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ExpenseItem, { Expense } from "../components/ExpenseItem";
@@ -14,10 +15,18 @@ import { getAllExpenses } from "../database/db";
 export default function MainScreen({ navigation }: any) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadExpenses = async () => {
     const data = await getAllExpenses();
     setExpenses(data as Expense[]);
+  };
+
+  // Hàm refresh khi kéo xuống
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadExpenses();
+    setRefreshing(false);
   };
 
   useEffect(() => {
@@ -65,6 +74,14 @@ export default function MainScreen({ navigation }: any) {
           <ExpenseItem item={item} onDelete={loadExpenses} />
         )}
         contentContainerStyle={{ padding: 16 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#4a90e2"]}
+            tintColor="#4a90e2"
+          />
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>

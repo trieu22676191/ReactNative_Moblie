@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getDeletedExpenses, restoreExpense } from "../database/db";
@@ -22,10 +23,18 @@ type Expense = {
 export default function TrashScreen({ navigation }: any) {
   const [deletedExpenses, setDeletedExpenses] = useState<Expense[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadDeletedExpenses = async () => {
     const data = await getDeletedExpenses();
     setDeletedExpenses(data as Expense[]);
+  };
+
+  // Hàm refresh khi kéo xuống
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadDeletedExpenses();
+    setRefreshing(false);
   };
 
   useEffect(() => {
@@ -117,6 +126,14 @@ export default function TrashScreen({ navigation }: any) {
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
           contentContainerStyle={{ padding: 16 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#e74c3c"]}
+              tintColor="#e74c3c"
+            />
+          }
         />
       )}
     </SafeAreaView>
