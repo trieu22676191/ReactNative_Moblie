@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, FlatList, SafeAreaView, TextInput, Button, Modal, Pressable, Alert } from 'react-native';
 import { useEffect, useState } from 'react';
-import { initDB, getTodos, addTodo, type Todo } from './db';
+import { initDB, getTodos, addTodo, toggleTodoDone, type Todo } from './db';
 
 export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -28,6 +28,11 @@ export default function App() {
     refreshTodos(); // Tải lại danh sách từ DB
     setCurrentTodo(''); // Xóa nội dung trong ô input
   };
+
+  const handleToggleTodo = (id: number, done: number) => {
+    toggleTodoDone(id, done);
+    refreshTodos();
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -60,9 +65,11 @@ export default function App() {
         data={todos}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={styles.todoItem}>
-            <Text style={item.done ? styles.doneText : styles.todoText}>{item.title}</Text>
-          </View>
+          <Pressable onPress={() => handleToggleTodo(item.id, item.done)}>
+            <View style={styles.todoItem}>
+              <Text style={item.done ? styles.doneText : styles.todoText}>{item.title}</Text>
+            </View>
+          </Pressable>
         )}
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>

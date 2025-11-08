@@ -72,3 +72,13 @@ export const addTodo = (title: string) => {
     console.error("Lỗi khi thêm todo: ", error);
   }
 };
+
+export const toggleTodoDone = (id: number, currentDoneStatus: number) => {
+  try {
+    // Lật trạng thái: nếu đang là 0 -> 1, nếu là 1 -> 0
+    const newDoneStatus = currentDoneStatus === 0 ? 1 : 0;
+    db.runSync("UPDATE todos SET done = ? WHERE id = ?", [newDoneStatus, id]);
+  } catch (error) {
+    console.error(`Lỗi khi cập nhật todo có id ${id}: `, error);
+  }
+};
