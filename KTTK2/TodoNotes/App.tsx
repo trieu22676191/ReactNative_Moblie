@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, FlatList, SafeAreaView, TextInput, Button, Modal, Pressable, Alert } from 'react-native';
+import { StyleSheet, Text, View, FlatList, SafeAreaView, TextInput, Button, Modal, Pressable, Alert, ActivityIndicator } from 'react-native';
 import { useEffect, useState, useMemo } from 'react';
-import { initDB, getTodos, addTodo, toggleTodoDone, updateTodoTitle, deleteTodo, type Todo } from './db';
+import { initDB, getTodos, addTodo, toggleTodoDone, updateTodoTitle, deleteTodo, mergeApiTodos, type Todo } from './db'; 
 
 export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -10,6 +10,7 @@ export default function App() {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const refreshTodos = () => {
     const data = getTodos();
@@ -76,6 +77,27 @@ export default function App() {
     );
   };
 
+  const handleSync = async () => {
+    setIsSyncing(true); // Bắt đầu loading
+    try {
+      const response = await fetch('https://690ee59bbd0fefc30a05f2ff.mockapi.io/TODOLIST');
+      if (!response.ok) {
+        throw new Error('Lỗi mạng hoặc máy chủ');
+      }
+      const apiTodos = await response.json();
+      
+      mergeApiTodos(apiTodos); // Gọi hàm xử lý logic trong db.ts
+      refreshTodos(); // Cập nhật lại danh sách trên UI
+      Alert.alert("Thành công", "Đồng bộ dữ liệu từ API thành công!");
+
+    } catch (error) {
+      console.error("Lỗi khi đồng bộ: ", error);
+      Alert.alert("Lỗi", "Không thể đồng bộ dữ liệu. Vui lòng thử lại.");
+    } finally {
+      setIsSyncing(false); // Dừng loading dù thành công hay thất bại
+    }
+  };
+
   // Dùng useMemo để tối ưu việc lọc, chỉ tính toán lại khi todos hoặc searchTerm thay đổi
   const filteredTodos = useMemo(() => {
     if (!searchTerm) {
@@ -90,7 +112,14 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
-        <TextInput style={styles.searchInput} placeholder="Tìm kiếm công việc..." value={searchTerm} onChangeText={setSearchTerm} />
+        <TextInput style={styles.searchInput} placeholder="Tìm kiếm công việc..." value={searchTerm} onChangeText={setSearchTerm} editable={!isSyncing} />
+        {isSyncing ? (
+          <ActivityIndicator style={styles.syncButton} size="small" color="#007AFF" />
+        ) : (
+          <Pressable onPress={handleSync} style={styles.syncButton}>
+            <Text style={styles.syncButtonText}>Đồng bộ API</Text>
+          </Pressable>
+        )}
       </View>
       {/* Modal Thêm Mới */}
       <Modal
@@ -185,6 +214,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    flexDirection: 'row',
   },
   searchInput: {
     height: 40,
@@ -193,6 +223,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     backgroundColor: '#f9f9f9',
+    flex: 1,
+    marginRight: 10,
   },
   todoItemContainer: {
     flexDirection: 'row',
@@ -285,5 +317,15 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     color: 'white',
+  },
+  syncButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  syncButtonText: {
+    color: '#007AFF',
+    fontWeight: '600',
   }
 });

@@ -98,3 +98,34 @@ export const deleteTodo = (id: number) => {
     console.error(`Lỗi khi xóa todo có id ${id}: `, error);
   }
 };
+
+type ApiTodo = {
+  title: string;
+  completed: boolean;
+  id: string;
+};
+
+export const mergeApiTodos = (apiTodos: ApiTodo[]) => {
+  try {
+    // Lấy tất cả các title hiện có để kiểm tra trùng lặp
+    const existingTitles = new Set(
+      db.getAllSync<{ title: string }>("SELECT title FROM todos;").map(t => t.title)
+    );
+
+    // Dùng transaction thủ công để đảm bảo tương thích
+    try {
+      db.execSync("BEGIN TRANSACTION;");
+      for (const todo of apiTodos) {
+        if (!existingTitles.has(todo.title)) {
+          db.runSync("INSERT INTO todos (title, done) VALUES (?, ?)", [todo.title, todo.completed ? 1 : 0]);
+        }
+      }
+      db.execSync("COMMIT;");
+    } catch (transactionError) {
+      db.execSync("ROLLBACK;");
+      throw transactionError; // Ném lại lỗi để khối catch bên ngoài bắt được
+    }
+  } catch (error) {
+    console.error("Lỗi khi hợp nhất dữ liệu từ API: ", error);
+  }
+};
