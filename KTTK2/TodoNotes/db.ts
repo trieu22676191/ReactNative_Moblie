@@ -63,3 +63,12 @@ export const getTodos = (): Todo[] => {
     return [];
   }
 };
+
+export const addTodo = (title: string) => {
+  try {
+    // Dùng runSync để thực thi câu lệnh INSERT
+    db.runSync("INSERT INTO todos (title) VALUES (?)", [title]);
+  } catch (error) {
+    console.error("Lỗi khi thêm todo: ", error);
+  }
+};
