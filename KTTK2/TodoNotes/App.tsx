@@ -1,12 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, FlatList, SafeAreaView, TextInput, Button, Modal, Pressable, Alert } from 'react-native';
 import { useEffect, useState } from 'react';
-import { initDB, getTodos, addTodo, toggleTodoDone, type Todo } from './db';
+import { initDB, getTodos, addTodo, toggleTodoDone, updateTodoTitle, type Todo } from './db';
 
 export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [currentTodo, setCurrentTodo] = useState('');
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [newTodoTitle, setNewTodoTitle] = useState('');
+  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
 
   const refreshTodos = () => {
     const data = getTodos();
@@ -19,27 +21,46 @@ export default function App() {
   }, []);
 
   const handleAddTodo = () => {
-    if (currentTodo.trim() === '') {
+    if (newTodoTitle.trim() === '') {
       Alert.alert("Lỗi", "Tiêu đề công việc không được để trống!");
       return;
     }
-    addTodo(currentTodo);
-    setIsModalVisible(false); // Đóng modal sau khi thêm
+    addTodo(newTodoTitle);
+    setIsAddModalVisible(false); // Đóng modal sau khi thêm
     refreshTodos(); // Tải lại danh sách từ DB
-    setCurrentTodo(''); // Xóa nội dung trong ô input
+    setNewTodoTitle(''); // Xóa nội dung trong ô input
   };
 
   const handleToggleTodo = (id: number, done: number) => {
     toggleTodoDone(id, done);
     refreshTodos();
-  }
+  };
+
+  const openEditModal = (todo: Todo) => {
+    setEditingTodo(todo);
+    setNewTodoTitle(todo.title);
+    setIsEditModalVisible(true);
+  };
+
+  const handleUpdateTodo = () => {
+    if (!editingTodo || newTodoTitle.trim() === '') {
+      Alert.alert("Lỗi", "Tiêu đề công việc không được để trống!");
+      return;
+    }
+    updateTodoTitle(editingTodo.id, newTodoTitle);
+    setIsEditModalVisible(false);
+    refreshTodos();
+    setNewTodoTitle('');
+    setEditingTodo(null);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Modal Thêm Mới */}
       <Modal
-        visible={isModalVisible}
+        visible={isAddModalVisible}
         animationType="slide"
-        onRequestClose={() => setIsModalVisible(false)}
+        onRequestClose={() => setIsAddModalVisible(false)}
       >
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalView}>
@@ -47,14 +68,41 @@ export default function App() {
             <TextInput
               style={styles.input}
               placeholder="Nhập tiêu đề công việc..."
-              value={currentTodo}
-              onChangeText={setCurrentTodo}
+              value={newTodoTitle}
+              onChangeText={setNewTodoTitle}
             />
             <View style={styles.buttonContainer}>
               <Button title="Lưu" onPress={handleAddTodo} />
               <Button title="Hủy" color="red" onPress={() => {
-                setIsModalVisible(false);
-                setCurrentTodo(''); // Xóa input khi hủy
+                setIsAddModalVisible(false);
+                setNewTodoTitle(''); // Xóa input khi hủy
+              }} />
+            </View>
+          </View>
+        </SafeAreaView>
+      </Modal>
+
+      {/* Modal Chỉnh Sửa */}
+      <Modal
+        visible={isEditModalVisible}
+        animationType="slide"
+        onRequestClose={() => setIsEditModalVisible(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>Chỉnh sửa công việc</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nhập tiêu đề mới..."
+              value={newTodoTitle}
+              onChangeText={setNewTodoTitle}
+            />
+            <View style={styles.buttonContainer}>
+              <Button title="Lưu" onPress={handleUpdateTodo} />
+              <Button title="Hủy" color="red" onPress={() => {
+                setIsEditModalVisible(false);
+                setNewTodoTitle('');
+                setEditingTodo(null);
               }} />
             </View>
           </View>
@@ -65,7 +113,10 @@ export default function App() {
         data={todos}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <Pressable onPress={() => handleToggleTodo(item.id, item.done)}>
+          <Pressable
+            onPress={() => handleToggleTodo(item.id, item.done)}
+            onLongPress={() => openEditModal(item)}
+          >
             <View style={styles.todoItem}>
               <Text style={item.done ? styles.doneText : styles.todoText}>{item.title}</Text>
             </View>
@@ -78,7 +129,7 @@ export default function App() {
         )}
       />
 
-      <Pressable style={styles.fab} onPress={() => setIsModalVisible(true)}>
+      <Pressable style={styles.fab} onPress={() => setIsAddModalVisible(true)}>
         <Text style={styles.fabIcon}>+</Text>
       </Pressable>
       <StatusBar style="auto" />

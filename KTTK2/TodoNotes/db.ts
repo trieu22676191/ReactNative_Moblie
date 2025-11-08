@@ -82,3 +82,11 @@ export const toggleTodoDone = (id: number, currentDoneStatus: number) => {
     console.error(`Lỗi khi cập nhật todo có id ${id}: `, error);
   }
 };
+
+export const updateTodoTitle = (id: number, title: string) => {
+  try {
+    db.runSync("UPDATE todos SET title = ? WHERE id = ?", [title, id]);
+  } catch (error) {
+    console.error(`Lỗi khi cập nhật tiêu đề todo có id ${id}: `, error);
+  }
+};
