@@ -1,13 +1,65 @@
-// File: db.ts
+// File: db.ts (Đã sửa đổi cho API đồng bộ)
+
+export type Todo = {
+  id: number;
+  title: string;
+  done: number; // 0 for false, 1 for true
+  created_at: number;
+};
+
+
 import * as SQLite from 'expo-sqlite';
+import { LogBox } from 'react-native';
+
+// Bỏ qua cảnh báo về việc sử dụng Sync API nếu có
+LogBox.ignoreLogs(['The SQLite.openDatabaseSync() and SQLite.deleteDatabaseSync()']); 
+
 
 /**
- * Mở kết nối đến database 'todos.db'
+ * Mở kết nối đến database 'todos.db' (Đồng bộ)
  */
 export function openDatabase() {
+  // Dùng openDatabaseSync theo yêu cầu của bạn
   const db = SQLite.openDatabaseSync('todos.db');
   return db;
 }
 
 // Xuất một thể hiện (instance) của DB để dùng chung
 export const db = openDatabase();
+
+export const initDB = () => {
+  try {
+    // 1. Tạo bảng todos nếu chưa có (dùng execSync)
+    db.execSync(`
+        CREATE TABLE IF NOT EXISTS todos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            title TEXT NOT NULL, 
+            done INTEGER DEFAULT 0, 
+            created_at INTEGER DEFAULT (cast(strftime('%s', 'now') as integer))
+        );
+    `);
+
+    // 2. Kiểm tra và Seed 2 bản ghi mẫu nếu bảng trống (dùng getAllSync và runSync)
+    const result = db.getAllSync<{ count: number }>("SELECT COUNT(id) as count FROM todos;");
+    
+    if (result.length > 0 && result[0].count === 0) {
+      db.runSync("INSERT INTO todos (title, done) VALUES (?, ?)", ["Công việc đầu tiên", 0]);
+      db.runSync("INSERT INTO todos (title, done) VALUES (?, ?)", ["Công việc đã hoàn thành", 1]);
+      console.log("Seed dữ liệu mẫu thành công.");
+    }
+    
+    console.log("Khởi tạo DB thành công / Bảng đã tồn tại.");
+    
+  } catch (error) {
+    console.error("Lỗi khi khởi tạo DB: ", error);
+  }
+};
+
+export const getTodos = (): Todo[] => {
+  try {
+    return db.getAllSync<Todo>("SELECT * FROM todos ORDER BY created_at DESC;");
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách todos: ", error);
+    return [];
+  }
+};
