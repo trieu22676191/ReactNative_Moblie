@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, FlatList, SafeAreaView, TextInput, Button, Modal, Pressable, Alert } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { initDB, getTodos, addTodo, toggleTodoDone, updateTodoTitle, deleteTodo, type Todo } from './db';
 
 export default function App() {
@@ -9,6 +9,7 @@ export default function App() {
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const refreshTodos = () => {
     const data = getTodos();
@@ -75,8 +76,22 @@ export default function App() {
     );
   };
 
+  // Dùng useMemo để tối ưu việc lọc, chỉ tính toán lại khi todos hoặc searchTerm thay đổi
+  const filteredTodos = useMemo(() => {
+    if (!searchTerm) {
+      return todos; // Nếu không có từ khóa tìm kiếm, trả về toàn bộ danh sách
+    }
+    // Lọc client-side, không phân biệt hoa thường
+    return todos.filter(todo =>
+      todo.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [todos, searchTerm]);
+
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.headerContainer}>
+        <TextInput style={styles.searchInput} placeholder="Tìm kiếm công việc..." value={searchTerm} onChangeText={setSearchTerm} />
+      </View>
       {/* Modal Thêm Mới */}
       <Modal
         visible={isAddModalVisible}
@@ -131,7 +146,7 @@ export default function App() {
       </Modal>
 
       <FlatList
-        data={todos}
+        data={filteredTodos} // Sử dụng danh sách đã lọc
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <Pressable
@@ -165,6 +180,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  headerContainer: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  searchInput: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    backgroundColor: '#f9f9f9',
   },
   todoItemContainer: {
     flexDirection: 'row',
