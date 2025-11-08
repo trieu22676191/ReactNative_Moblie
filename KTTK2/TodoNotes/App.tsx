@@ -1,11 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, FlatList, SafeAreaView, TextInput, Button } from 'react-native';
+import { StyleSheet, Text, View, FlatList, SafeAreaView, TextInput, Button, Modal, Pressable, Alert } from 'react-native';
 import { useEffect, useState } from 'react';
 import { initDB, getTodos, addTodo, type Todo } from './db';
 
 export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [currentTodo, setCurrentTodo] = useState('');
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const refreshTodos = () => {
     const data = getTodos();
@@ -18,23 +19,43 @@ export default function App() {
   }, []);
 
   const handleAddTodo = () => {
-    if (currentTodo.trim() === '') return; // Không thêm nếu input rỗng
+    if (currentTodo.trim() === '') {
+      Alert.alert("Lỗi", "Tiêu đề công việc không được để trống!");
+      return;
+    }
     addTodo(currentTodo);
+    setIsModalVisible(false); // Đóng modal sau khi thêm
     refreshTodos(); // Tải lại danh sách từ DB
     setCurrentTodo(''); // Xóa nội dung trong ô input
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Thêm việc mới..."
-          value={currentTodo}
-          onChangeText={setCurrentTodo}
-        />
-        <Button title="Thêm" onPress={handleAddTodo} />
-      </View>
+      <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>Thêm công việc mới</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nhập tiêu đề công việc..."
+              value={currentTodo}
+              onChangeText={setCurrentTodo}
+            />
+            <View style={styles.buttonContainer}>
+              <Button title="Lưu" onPress={handleAddTodo} />
+              <Button title="Hủy" color="red" onPress={() => {
+                setIsModalVisible(false);
+                setCurrentTodo(''); // Xóa input khi hủy
+              }} />
+            </View>
+          </View>
+        </SafeAreaView>
+      </Modal>
+
       <FlatList
         data={todos}
         keyExtractor={(item) => item.id.toString()}
@@ -49,6 +70,10 @@ export default function App() {
           </View>
         )}
       />
+
+      <Pressable style={styles.fab} onPress={() => setIsModalVisible(true)}>
+        <Text style={styles.fabIcon}>+</Text>
+      </Pressable>
       <StatusBar style="auto" />
     </SafeAreaView>
   );
@@ -58,20 +83,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    padding: 10,
-    borderBottomWidth: 1,
-    borderColor: '#ccc',
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginRight: 10,
   },
   todoItem: {
     padding: 15,
@@ -95,5 +106,60 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     color: '#888',
+  },
+  fab: {
+    position: 'absolute',
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    right: 20,
+    bottom: 20,
+    backgroundColor: '#007AFF',
+    borderRadius: 28,
+    elevation: 8,
+  },
+  fabIcon: {
+    fontSize: 24,
+    color: 'white',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.1)'
+  },
+  modalView: {
+    width: '90%',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  input: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 20,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '60%',
   }
 });
