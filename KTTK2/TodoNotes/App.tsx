@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, FlatList, SafeAreaView, TextInput, Button, Modal, Pressable, Alert } from 'react-native';
 import { useEffect, useState } from 'react';
-import { initDB, getTodos, addTodo, toggleTodoDone, updateTodoTitle, type Todo } from './db';
+import { initDB, getTodos, addTodo, toggleTodoDone, updateTodoTitle, deleteTodo, type Todo } from './db';
 
 export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -52,6 +52,27 @@ export default function App() {
     refreshTodos();
     setNewTodoTitle('');
     setEditingTodo(null);
+  };
+
+  const handleDeleteTodo = (id: number) => {
+    Alert.alert(
+      "Xác nhận xóa",
+      "Bạn có chắc chắn muốn xóa công việc này không?",
+      [
+        {
+          text: "Hủy",
+          style: "cancel"
+        },
+        { 
+          text: "Xóa", 
+          onPress: () => {
+            deleteTodo(id);
+            refreshTodos();
+          },
+          style: "destructive" // Màu đỏ trên iOS
+        }
+      ]
+    );
   };
 
   return (
@@ -117,9 +138,12 @@ export default function App() {
             onPress={() => handleToggleTodo(item.id, item.done)}
             onLongPress={() => openEditModal(item)}
           >
-            <View style={styles.todoItem}>
-              <Text style={item.done ? styles.doneText : styles.todoText}>{item.title}</Text>
-            </View>
+            <View style={styles.todoItemContainer}>
+              <Text style={[styles.todoText, item.done && styles.doneText]}>{item.title}</Text>
+              <Pressable onPress={() => handleDeleteTodo(item.id)} style={styles.deleteButton}>
+                <Text style={styles.deleteButtonText}>Xóa</Text>
+              </Pressable>
+            </View> 
           </Pressable>
         )}
         ListEmptyComponent={() => (
@@ -142,13 +166,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  todoItem: {
+  todoItemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
   todoText: {
     fontSize: 18,
+    flex: 1, // Đảm bảo text không bị tràn ra ngoài
   },
   doneText: {
     fontSize: 18,
@@ -219,5 +247,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '60%',
+  },
+  deleteButton: {
+    backgroundColor: '#ff3b30',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginLeft: 10,
+  },
+  deleteButtonText: {
+    color: 'white',
   }
 });

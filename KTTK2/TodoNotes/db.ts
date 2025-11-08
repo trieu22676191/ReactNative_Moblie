@@ -90,3 +90,11 @@ export const updateTodoTitle = (id: number, title: string) => {
     console.error(`Lỗi khi cập nhật tiêu đề todo có id ${id}: `, error);
   }
 };
+
+export const deleteTodo = (id: number) => {
+  try {
+    db.runSync("DELETE FROM todos WHERE id = ?", [id]);
+  } catch (error) {
+    console.error(`Lỗi khi xóa todo có id ${id}: `, error);
+  }
+};
